@@ -40,15 +40,12 @@ func (r Handler) OnMessage(ctx context.Context, msgView bot.MessageView, botID s
 
 		if "sync" == inst {
 			// Sync? Ack!
-			Response(ctx, msgView, "ack")
+			Respond(ctx, msgView, "ack")
 		} else if "hello" == inst {
 			// Hello? Give you some money!
 			Transfer(ctx, msgView)
 		} else {
-			if err = client.SendPlainText(ctx, msgView, defaultResponse); err != nil {
-				log.Panicf("Error: %s\n", err)
-				return err
-			}
+			Respond(ctx, msgView, defaultResponse)
 		}
 	}
 	return nil
@@ -71,12 +68,12 @@ func Transfer(ctx context.Context, msgView bot.MessageView) {
 		config.MixinPinToken,
 	)
 	if err != nil {
-		Response(ctx, msgView, fmt.Sprintf("Oops, %s\n", err))
+		Respond(ctx, msgView, fmt.Sprintf("Oops, %s\n", err))
 	}
 }
 
-// Response a simple word to user.
-func Response(ctx context.Context, msgView bot.MessageView, msg string) {
+// Respond to user.
+func Respond(ctx context.Context, msgView bot.MessageView, msg string) {
 	if err := client.SendPlainText(ctx, msgView, msg); err != nil {
 		log.Panicf("Error: %s\n", err)
 	}
