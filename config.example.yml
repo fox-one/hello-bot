@@ -1,0 +1,9 @@
+client_id: YOUR CLIENT ID
+client_secret: YOUR CLIENT SECRET
+session_id: YOUR SESSION ID
+pin: YOUR PIN
+pin_token: YOUR PIN TOKEN
+private_key: |
+  -----BEGIN RSA PRIVATE KEY-----
+  ...
+  -----END RSA PRIVATE KEY-----

@@ -28,7 +28,7 @@ type Handler struct{}
 func (r Handler) OnMessage(ctx context.Context, msgView bot.MessageView, botID string) error {
 	// I handle PLAIN_TEXT message only and make sure respond to current conversation.
 	if msgView.Category == bot.MessageCategoryPlainText &&
-		msgView.ConversationId == bot.UniqueConversationId(config.MixinClientID, msgView.UserId) {
+		msgView.ConversationId == bot.UniqueConversationId(config.GetConfig().ClientID, msgView.UserId) {
 		var data []byte
 		var err error
 		if data, err = base64.StdEncoding.DecodeString(msgView.Data); err != nil {
@@ -61,11 +61,11 @@ func Transfer(ctx context.Context, msgView bot.MessageView) {
 		Memo:        "Hello world",
 	}
 	err := bot.CreateTransfer(ctx, &payload,
-		config.MixinClientID,
-		config.MixinSessionID,
-		config.MixinPrivateKey,
-		config.MixinPin,
-		config.MixinPinToken,
+		config.GetConfig().ClientID,
+		config.GetConfig().SessionID,
+		config.GetConfig().PrivateKey,
+		config.GetConfig().Pin,
+		config.GetConfig().PinToken,
 	)
 	if err != nil {
 		Respond(ctx, msgView, fmt.Sprintf("Oops, %s\n", err))
@@ -85,7 +85,7 @@ func main() {
 	handler := Handler{}
 
 	// Create a bot client
-	client = bot.NewBlazeClient(config.MixinClientID, config.MixinSessionID, config.MixinPrivateKey)
+	client = bot.NewBlazeClient(config.GetConfig().ClientID, config.GetConfig().SessionID, config.GetConfig().PrivateKey)
 
 	// Start the loop
 	for {
