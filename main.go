@@ -26,8 +26,9 @@ type Handler struct{}
 
 // OnMessage is a general method of bot.BlazeListener
 func (r Handler) OnMessage(ctx context.Context, msgView bot.MessageView, botID string) error {
-	if msgView.Category == bot.MessageCategoryPlainText {
-		// I handle PLAIN_TEXT message only.
+	// I handle PLAIN_TEXT message only and make sure respond to current conversation.
+	if msgView.Category == bot.MessageCategoryPlainText &&
+		msgView.ConversationId == bot.UniqueConversationId(config.MixinClientID, msgView.UserId) {
 		var data []byte
 		var err error
 		if data, err = base64.StdEncoding.DecodeString(msgView.Data); err != nil {
@@ -63,8 +64,8 @@ func Transfer(ctx context.Context, msgView bot.MessageView) {
 		Memo:        "Hello world",
 	}
 	err := bot.CreateTransfer(ctx, &payload,
-		config.MixinClientId,
-		config.MixinSessionId,
+		config.MixinClientID,
+		config.MixinSessionID,
 		config.MixinPrivateKey,
 		config.MixinPin,
 		config.MixinPinToken,
@@ -87,7 +88,7 @@ func main() {
 	handler := Handler{}
 
 	// Create a bot client
-	client = bot.NewBlazeClient(config.MixinClientId, config.MixinSessionId, config.MixinPrivateKey)
+	client = bot.NewBlazeClient(config.MixinClientID, config.MixinSessionID, config.MixinPrivateKey)
 
 	// Start the loop
 	for {
