@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"fmt"
@@ -41,9 +42,12 @@ func (r Handler) OnMessage(ctx context.Context, msgView bot.MessageView, botID s
 		if "sync" == inst {
 			// Sync? Ack!
 			Respond(ctx, msgView, "ack")
-		} else if "hello" == inst {
-			// Hello? Give you some money!
+		} else if "smtm" == inst {
+			// Show me the money. Okay.
 			Transfer(ctx, msgView)
+		} else if "assets" == inst {
+			// Show me your assets. Okay.
+			ShowAssets(ctx, msgView)
 		} else {
 			Respond(ctx, msgView, defaultResponse)
 		}
@@ -58,7 +62,7 @@ func Transfer(ctx context.Context, msgView bot.MessageView) {
 		RecipientId: msgView.UserId,
 		Amount:      number.FromString("1.024"),
 		TraceId:     uuid.Must(uuid.NewV4()).String(),
-		Memo:        "Hello world",
+		Memo:        "Enjoy!",
 	}
 	err := bot.CreateTransfer(ctx, &payload,
 		config.GetConfig().ClientID,
@@ -70,6 +74,33 @@ func Transfer(ctx context.Context, msgView bot.MessageView) {
 	if err != nil {
 		Respond(ctx, msgView, fmt.Sprintf("Oops, %s\n", err))
 	}
+}
+
+// ShowAssets show all my assets
+func ShowAssets(ctx context.Context, msgView bot.MessageView) {
+	var accessToken string
+	var err error
+	var assets []bot.Asset
+	// generate an access token
+	accessToken, err = bot.SignAuthenticationToken(
+		config.GetConfig().ClientID,
+		config.GetConfig().SessionID,
+		config.GetConfig().PrivateKey, "GET", "/assets", "")
+	if err != nil {
+		Respond(ctx, msgView, fmt.Sprintf("Oops, %s\n", err))
+		return
+	}
+	// get all assets.
+	assets, err = bot.AssetList(ctx, accessToken)
+	if err != nil {
+		Respond(ctx, msgView, fmt.Sprintf("Oops, %s\n", err))
+		return
+	}
+	var assetsBuffer bytes.Buffer
+	for _, asset := range assets {
+		assetsBuffer.WriteString(fmt.Sprintf("%s: %s\n", asset.Symbol, asset.Balance))
+	}
+	Respond(ctx, msgView, fmt.Sprintf("My Assets:\n%s", assetsBuffer.String()))
 }
 
 // Respond to user.
